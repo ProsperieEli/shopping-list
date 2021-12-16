@@ -1,5 +1,5 @@
 import React from 'react';
-import { useReducer } from 'react';
+import { useReducer, useState } from 'react';
 
 const initialItem = [];
 
@@ -9,7 +9,7 @@ function reducerItem(items, action) {
       return [
         ...items,
         {
-          id: action.id,
+          id: items.length,
           text: action.text,
         },
       ];
@@ -23,10 +23,9 @@ function reducerItem(items, action) {
       });
     }
     case 'Delete item': {
-      return items.filter((item) => {
-        item.id !== action.id;
-      });
+      return items.filter((item) => item.id !== action.id);
     }
+
     default: {
       throw Error(`Error at: ${action.type}`);
     }
@@ -34,7 +33,53 @@ function reducerItem(items, action) {
 }
 
 export default function Home() {
-  const [item, dispatch] = useReducer(reducerItem, initialItem);
+  const [items, dispatch] = useReducer(reducerItem, initialItem);
+  const [text, setText] = useState('');
 
-  return <div></div>;
+  const handleSubmitAdd = (e) => {
+    e.preventDefault();
+    dispatch({
+      type: 'Add Item',
+      text,
+    });
+  };
+  const handleSubmitChange = (task) => {
+    dispatch({
+      type: 'Edit Item',
+      task,
+    });
+  };
+  const handleSubmitDelete = (taskId) => {
+    dispatch({
+      type: 'Delete item',
+      id: taskId,
+    });
+  };
+
+  return (
+    <>
+      <h1>Shopping we go!</h1>
+      <form onSubmit={handleSubmitAdd}>
+        <input
+          type={text}
+          placeholder="Food Search"
+          onChange={(e) => setText(e.target.value)}
+        />
+        <button type="submit">Add item!</button>
+      </form>
+      <ul>
+        {items.map((item) => {
+          return (
+            <li>
+              {item.text}
+              <button onClick={handleSubmitChange}>Modify</button>
+              <button onClick={() => handleSubmitDelete(item.id)}>
+                Delete
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </>
+  );
 }
